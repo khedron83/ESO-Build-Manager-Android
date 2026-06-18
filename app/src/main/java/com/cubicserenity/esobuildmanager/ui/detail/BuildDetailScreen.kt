@@ -10,12 +10,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.cubicserenity.esobuildmanager.domain.model.Build
 import com.cubicserenity.esobuildmanager.domain.model.GearPiece
 import com.cubicserenity.esobuildmanager.util.GEAR_SLOTS
+import com.cubicserenity.esobuildmanager.util.SkillData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,13 +100,13 @@ fun BuildSheet(build: Build, modifier: Modifier = Modifier) {
             val barSkills = build.skills.filter { it.bar == barIdx }.associateBy { it.slot }
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 for (slot in 0..4) {
-                    SkillChip(barSkills[slot]?.name ?: "—", Modifier.weight(1f))
+                    SkillChip(barSkills[slot]?.name ?: "—", Modifier.weight(1f), showIcon = true)
                 }
             }
             val ult = barSkills[5]?.name ?: "—"
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Ult:", style = MaterialTheme.typography.labelMedium)
-                SkillChip(ult, Modifier.fillMaxWidth())
+                SkillChip(ult, Modifier.fillMaxWidth(), showIcon = true)
             }
             if (barIdx == 0) Spacer(Modifier.height(4.dp))
         }
@@ -166,19 +170,44 @@ private fun SectionHeader(title: String) {
 }
 
 @Composable
-private fun SkillChip(text: String, modifier: Modifier = Modifier) {
+private fun SkillChip(text: String, modifier: Modifier = Modifier, showIcon: Boolean = false) {
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.small,
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 1.dp,
     ) {
-        Text(
-            text,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            maxLines = 1,
-        )
+        if (showIcon && text != "—") {
+            val iconUrl = remember(text) { SkillData.skillIconUrl(text) }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(4.dp),
+            ) {
+                if (iconUrl != null) {
+                    AsyncImage(
+                        model = iconUrl,
+                        contentDescription = text,
+                        modifier = Modifier.size(44.dp),
+                    )
+                } else {
+                    Spacer(Modifier.size(44.dp))
+                }
+                Text(
+                    text,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            Text(
+                text,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -193,7 +222,7 @@ private fun GearRow(slot: String, piece: GearPiece?) {
                 piece?.setName?.takeIf { it.isNotBlank() }?.let { add(it) }
                 piece?.weight?.takeIf { it.isNotBlank() && it != "—" }?.let { add(it) }
                 piece?.trait?.takeIf { it.isNotBlank() }?.let { add(it) }
-                piece?.quality?.takeIf { it.isNotBlank() }?.let { add(it) }
+                piece?.enchant?.takeIf { it.isNotBlank() }?.let { add(it) }
             }
             Text(
                 if (parts.isEmpty()) "—" else parts.joinToString("  ·  "),

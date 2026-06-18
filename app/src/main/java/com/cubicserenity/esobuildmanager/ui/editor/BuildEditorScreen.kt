@@ -13,9 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.cubicserenity.esobuildmanager.util.*
+import com.cubicserenity.esobuildmanager.util.SkillData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,21 +118,89 @@ private fun SkillsTab(build: com.cubicserenity.esobuildmanager.domain.model.Buil
             Text(barLabel, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
             val barSkills = build.skills.filter { it.bar == barIdx }.associateBy { it.slot }
             for (slot in 0..4) {
-                OutlinedTextField(
-                    value = barSkills[slot]?.name ?: "",
+                val skillName = barSkills[slot]?.name ?: ""
+                SkillSlotRow(
+                    value = skillName,
                     onValueChange = { vm.setSkill(barIdx, slot, it) },
-                    label = { Text("Slot ${slot + 1}") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
+                    label = "Slot ${slot + 1}",
                 )
             }
-            OutlinedTextField(
-                value = barSkills[5]?.name ?: "",
+            val ultName = barSkills[5]?.name ?: ""
+            SkillSlotRow(
+                value = ultName,
                 onValueChange = { vm.setSkill(barIdx, 5, it) },
-                label = { Text("Ultimate") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                label = "Ultimate",
             )
+        }
+    }
+}
+
+@Composable
+private fun SkillSlotRow(value: String, onValueChange: (String) -> Unit, label: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        val iconUrl = remember(value) { if (value.isNotBlank()) SkillData.skillIconUrl(value) else null }
+        Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+            if (iconUrl != null) {
+                AsyncImage(model = iconUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
+            }
+        }
+        SkillAutocompleteField(
+            value = value,
+            onValueChange = onValueChange,
+            label = label,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun SkillAutocompleteField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    val suggestions = remember(value) {
+        if (value.length < 2) emptyList()
+        else SkillData.skillNames.filter { it.contains(value, ignoreCase = true) }.take(8)
+    }
+    var showDropdown by remember { mutableStateOf(false) }
+
+    LaunchedEffect(suggestions) {
+        if (suggestions.isNotEmpty()) showDropdown = true
+    }
+
+    Box(modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = { onValueChange(it); showDropdown = true },
+            label = { Text(label) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            trailingIcon = if (value.isNotBlank()) {
+                {
+                    IconButton(onClick = { onValueChange(""); showDropdown = false }) {
+                        Icon(Icons.Default.Clear, "Clear")
+                    }
+                }
+            } else null,
+        )
+        DropdownMenu(
+            expanded = showDropdown && suggestions.isNotEmpty(),
+            onDismissRequest = { showDropdown = false },
+            properties = PopupProperties(focusable = false),
+            modifier = Modifier.heightIn(max = 200.dp),
+        ) {
+            suggestions.forEach { suggestion ->
+                DropdownMenuItem(
+                    text = { Text(suggestion, style = MaterialTheme.typography.bodyMedium) },
+                    onClick = { onValueChange(suggestion); showDropdown = false },
+                )
+            }
         }
     }
 }
@@ -199,7 +270,6 @@ private fun GearSlotEditor(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
-                DropdownField("Quality", piece.quality, QUALITY_TIERS) { onUpdate(piece.copy(quality = it)) }
             }
         }
     }

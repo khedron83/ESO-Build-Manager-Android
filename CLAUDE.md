@@ -18,8 +18,9 @@ A Kotlin/Compose Android app for managing Elder Scrolls Online character builds.
 | Local DB | Room |
 | Preferences | DataStore |
 | Async | Kotlin Coroutines |
+| Images | Coil 2 (skill icons from UESP) |
 
-No Retrofit (no REST API — sync uses raw WebDAV via OkHttp). No Coil (no images).
+No Retrofit (no REST API — sync uses raw WebDAV via OkHttp).
 
 ## Project Layout
 
@@ -52,6 +53,7 @@ app/src/main/java/com/cubicserenity/esobuildmanager/
     Build.kt                      Build + Skill + GearPiece domain models
   util/
     Constants.kt                  ESO_CLASSES, ROLES, GEAR_SLOTS, traits, etc.
+    SkillData.kt                  Skill name list + UESP icon URL computation (singleton)
 ```
 
 ## Building
