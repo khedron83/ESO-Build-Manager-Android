@@ -33,6 +33,26 @@ val JEWELRY_TRAITS = listOf(
 )
 val JEWELRY_SLOTS = setOf("Neck", "Ring 1", "Ring 2")
 val WEAPON_SLOTS = setOf("Main Hand", "Off Hand", "Backup Main", "Backup Off")
+val MAIN_HAND_SLOTS = setOf("Main Hand", "Backup Main")
+
+val WEAPON_TYPES = listOf(
+    "Axe", "Battle Axe", "Bow", "Dagger", "Greatsword",
+    "Ice Staff", "Inferno Staff", "Lightning Staff", "Mace", "Maul",
+    "Restoration Staff", "Shield", "Sword",
+)
+
+val ENCHANT_SUGGESTIONS = listOf(
+    "Absorb Health", "Absorb Magicka", "Absorb Stamina",
+    "Berserker", "Bracing", "Crusher",
+    "Disease Damage", "Flame Damage", "Frost Damage",
+    "Health Recovery", "Life Drain",
+    "Magicka Recovery", "Max Health", "Max Magicka", "Max Stamina",
+    "Oblivion Damage", "Physical Resistance", "Poison Damage",
+    "Prismatic Defense", "Prismatic Onslaught",
+    "Reduce Block Cost", "Reduce Feat Cost", "Reduce Roll Dodge Cost", "Reduce Sprint Cost",
+    "Shielding", "Shock Damage", "Spell Damage", "Spell Resistance",
+    "Stamina Recovery", "Weakening", "Weapon Damage",
+)
 
 val QUALITY_TIERS = listOf("Normal", "Fine", "Superior", "Epic", "Legendary")
 

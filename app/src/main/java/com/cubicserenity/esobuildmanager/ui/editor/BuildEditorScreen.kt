@@ -148,25 +148,27 @@ private fun SkillSlotRow(value: String, onValueChange: (String) -> Unit, label: 
                 AsyncImage(model = iconUrl, contentDescription = null, modifier = Modifier.fillMaxSize())
             }
         }
-        SkillAutocompleteField(
+        AutocompleteTextField(
             value = value,
             onValueChange = onValueChange,
             label = label,
+            candidates = SkillData.skillNames,
             modifier = Modifier.weight(1f),
         )
     }
 }
 
 @Composable
-private fun SkillAutocompleteField(
+fun AutocompleteTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    candidates: List<String>,
     modifier: Modifier = Modifier,
 ) {
-    val suggestions = remember(value) {
+    val suggestions = remember(value, candidates) {
         if (value.length < 2) emptyList()
-        else SkillData.skillNames.filter { it.contains(value, ignoreCase = true) }.take(8)
+        else candidates.filter { it.contains(value, ignoreCase = true) }.take(8)
     }
     var showDropdown by remember { mutableStateOf(false) }
 
@@ -227,6 +229,7 @@ private fun GearSlotEditor(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val isOffHand = slot in OFF_HAND_SLOTS
+    val isMainHand = slot in MAIN_HAND_SLOTS
     val isJewelry = slot in JEWELRY_SLOTS
     val isWeapon = slot in WEAPON_SLOTS
 
@@ -253,22 +256,23 @@ private fun GearSlotEditor(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                 )
-                if (!isJewelry) {
-                    val weights = if (isOffHand) OFF_HAND_WEIGHTS else ARMOR_WEIGHTS
-                    DropdownField("Weight", piece.weight, weights) { onUpdate(piece.copy(weight = it)) }
+                when {
+                    isMainHand -> DropdownField("Weapon Type", piece.weight, listOf("") + WEAPON_TYPES) { onUpdate(piece.copy(weight = it)) }
+                    isOffHand -> DropdownField("Off-hand", piece.weight, OFF_HAND_WEIGHTS) { onUpdate(piece.copy(weight = it)) }
+                    !isJewelry -> DropdownField("Weight", piece.weight, listOf("") + ARMOR_WEIGHTS) { onUpdate(piece.copy(weight = it)) }
                 }
                 val traits = when {
                     isJewelry -> JEWELRY_TRAITS
                     isWeapon -> WEAPON_TRAITS
                     else -> ARMOR_TRAITS
                 }
-                DropdownField("Trait", piece.trait, traits) { onUpdate(piece.copy(trait = it)) }
-                OutlinedTextField(
+                DropdownField("Trait", piece.trait, listOf("") + traits) { onUpdate(piece.copy(trait = it)) }
+                AutocompleteTextField(
                     value = piece.enchant,
                     onValueChange = { onUpdate(piece.copy(enchant = it)) },
-                    label = { Text("Enchant") },
+                    label = "Enchant",
+                    candidates = ENCHANT_SUGGESTIONS,
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
                 )
             }
         }
