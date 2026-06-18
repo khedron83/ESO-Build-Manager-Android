@@ -1,5 +1,21 @@
 package com.cubicserenity.esobuildmanager.util
 
+val CLASS_SKILL_LINES: Map<String, List<String>> = mapOf(
+    "Arcanist"     to listOf("Apocrypha", "Herald of the Tome", "Soldier of Apocrypha"),
+    "Dragonknight" to listOf("Ardent Flame", "Draconic Power", "Earthen Heart"),
+    "Necromancer"  to listOf("Bone Tyrant", "Grave Lord", "Living Death"),
+    "Nightblade"   to listOf("Assassination", "Shadow", "Siphoning"),
+    "Sorcerer"     to listOf("Daedric Summoning", "Dark Magic", "Storm Calling"),
+    "Templar"      to listOf("Aedric Spear", "Dawn's Wrath", "Restoring Light"),
+    "Warden"       to listOf("Animal Companions", "Green Balance", "Winter's Embrace"),
+)
+
+fun skillLinesExcluding(vararg excludedClasses: String): List<String> =
+    CLASS_SKILL_LINES.filterKeys { it !in excludedClasses }.values.flatten()
+
+fun classOfSkillLine(line: String): String =
+    CLASS_SKILL_LINES.entries.firstOrNull { line in it.value }?.key ?: ""
+
 val ESO_CLASSES = listOf(
     "Arcanist", "Dragonknight", "Necromancer", "Nightblade",
     "Sorcerer", "Templar", "Warden",

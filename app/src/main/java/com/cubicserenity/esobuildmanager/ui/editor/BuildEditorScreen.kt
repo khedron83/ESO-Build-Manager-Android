@@ -91,8 +91,15 @@ private fun InfoTab(build: com.cubicserenity.esobuildmanager.domain.model.Build,
         )
 
         DropdownField("Class", build.esoClass, ESO_CLASSES) { vm.update { copy(esoClass = it) } }
-        DropdownField("Subclass 1", build.subclass1, listOf("") + ESO_CLASSES) { vm.update { copy(subclass1 = it) } }
-        DropdownField("Subclass 2", build.subclass2, listOf("") + ESO_CLASSES) { vm.update { copy(subclass2 = it) } }
+        val sub1Lines = remember(build.esoClass) {
+            listOf("") + skillLinesExcluding(build.esoClass)
+        }
+        val sub2Lines = remember(build.esoClass, build.subclass1) {
+            val sub1Class = classOfSkillLine(build.subclass1)
+            listOf("") + skillLinesExcluding(build.esoClass, sub1Class)
+        }
+        DropdownField("Subclass Line 1", build.subclass1, sub1Lines) { vm.update { copy(subclass1 = it) } }
+        DropdownField("Subclass Line 2", build.subclass2, sub2Lines) { vm.update { copy(subclass2 = it) } }
         DropdownField("Role", build.role, ROLES) { vm.update { copy(role = it) } }
         DropdownField("Content", build.content, CONTENT_TYPES) { vm.update { copy(content = it) } }
         DropdownField("Patch", build.gamePatch, GAME_PATCHES) { vm.update { copy(gamePatch = it) } }
