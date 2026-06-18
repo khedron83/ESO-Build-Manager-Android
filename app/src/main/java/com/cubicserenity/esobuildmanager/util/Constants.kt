@@ -21,7 +21,7 @@ val ESO_CLASSES = listOf(
     "Sorcerer", "Templar", "Warden",
 )
 
-val ROLES = listOf("Healer", "Hybrid", "MagDPS", "StamDPS", "Tank")
+val ROLES = listOf("DPS", "Healer", "Hybrid", "Tank")
 
 val CONTENT_TYPES = listOf("Dungeon", "Overland", "PvP", "Solo", "Trial")
 

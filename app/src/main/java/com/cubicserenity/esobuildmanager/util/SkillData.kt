@@ -67,6 +67,7 @@ object SkillData {
                     if (line.isNotEmpty() && !_skillLineMap.containsKey(name)) {
                         _skillLineMap[name] = line
                     }
+                }
             }
         }
 
