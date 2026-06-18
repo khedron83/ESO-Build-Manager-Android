@@ -1,0 +1,3 @@
+-keepattributes *Annotation*
+-keep class com.cubicserenity.esobuildmanager.** { *; }
+-keep class com.google.gson.** { *; }
