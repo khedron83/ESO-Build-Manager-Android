@@ -77,11 +77,15 @@ class WebDavSyncClient @Inject constructor(
         }
 
         // Discover remote builds not in uploadedSlugs
+        val propfindBody = """<?xml version="1.0" encoding="utf-8"?>
+<D:propfind xmlns:D="DAV:"><D:prop><D:resourcetype/></D:prop></D:propfind>"""
+            .toRequestBody("application/xml; charset=utf-8".toMediaType())
+
         val remoteFiles = runCatching {
             val response = client.newCall(
                 Request.Builder()
                     .url(dirUrl(config.serverUrl, config.username))
-                    .method("PROPFIND", ByteArray(0).toRequestBody(null))
+                    .method("PROPFIND", propfindBody)
                     .header("Depth", "1")
                     .build()
             ).execute()
@@ -217,8 +221,8 @@ class WebDavSyncClient @Inject constructor(
     }.getOrNull()
 
     private fun parsePropfindFilenames(xml: String): List<String> = runCatching {
-        val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            .parse(InputSource(StringReader(xml)))
+        val factory = DocumentBuilderFactory.newInstance().also { it.isNamespaceAware = true }
+        val doc = factory.newDocumentBuilder().parse(InputSource(StringReader(xml)))
         val hrefs = doc.getElementsByTagNameNS("DAV:", "href")
         (0 until hrefs.length)
             .map { hrefs.item(it).textContent.trim() }
