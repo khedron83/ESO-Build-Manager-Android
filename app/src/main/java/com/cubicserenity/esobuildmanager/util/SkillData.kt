@@ -54,14 +54,19 @@ object SkillData {
             }
         }
 
+        // Fallback: skill_ids.json fills line map gaps (keys are "Category::LineName")
         runCatching {
             val json = context.assets.open("skill_ids.json").bufferedReader().readText()
             val obj = gson.fromJson(json, JsonObject::class.java)
-            for ((_, skillsEl) in obj.entrySet()) {
+            for ((lineKey, skillsEl) in obj.entrySet()) {
                 if (!skillsEl.isJsonObject) continue
+                val sep = lineKey.indexOf("::")
+                val line = if (sep >= 0) lineKey.substring(sep + 2) else ""
                 for ((name, _) in skillsEl.asJsonObject.entrySet()) {
                     names.add(name)
-                }
+                    if (line.isNotEmpty() && !_skillLineMap.containsKey(name)) {
+                        _skillLineMap[name] = line
+                    }
             }
         }
 
