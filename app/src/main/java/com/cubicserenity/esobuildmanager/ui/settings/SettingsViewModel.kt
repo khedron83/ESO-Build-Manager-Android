@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
@@ -75,20 +77,22 @@ class SettingsViewModel @Inject constructor(
             try {
                 val config = ServerConfig(s.serverUrl.trim().trimEnd('/'), s.username.trim(), s.password, s.ignoreSsl)
                 val client = NetworkModule.buildClient(config)
-                val resp = client.newCall(
-                    Request.Builder()
-                        .url("${config.serverUrl}/remote.php/dav/files/${config.username}/")
-                        .method("PROPFIND", ByteArray(0).toRequestBody(null))
-                        .header("Depth", "0")
-                        .build()
-                ).execute()
+                val resp = withContext(Dispatchers.IO) {
+                    client.newCall(
+                        Request.Builder()
+                            .url("${config.serverUrl}/remote.php/dav/files/${config.username}/")
+                            .method("PROPFIND", ByteArray(0).toRequestBody(null))
+                            .header("Depth", "0")
+                            .build()
+                    ).execute()
+                }
                 if (resp.isSuccessful || resp.code == 207) {
                     _state.update { it.copy(isTesting = false, testResult = "Connection successful!") }
                 } else {
                     _state.update { it.copy(isTesting = false, testResult = "Failed: HTTP ${resp.code}") }
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(isTesting = false, testResult = "Failed: ${e.message}") }
+                _state.update { it.copy(isTesting = false, testResult = "Failed: ${e.message ?: e.javaClass.simpleName}") }
             }
         }
     }
