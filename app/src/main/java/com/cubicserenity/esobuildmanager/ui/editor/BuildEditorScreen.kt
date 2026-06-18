@@ -269,6 +269,7 @@ private fun NotesTab(build: com.cubicserenity.esobuildmanager.domain.model.Build
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownField(label: String, value: String, options: List<String>, onSelect: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
