@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import javax.inject.Inject
 
 data class SettingsUiState(
@@ -77,7 +78,7 @@ class SettingsViewModel @Inject constructor(
                 val resp = client.newCall(
                     Request.Builder()
                         .url("${config.serverUrl}/remote.php/dav/files/${config.username}/")
-                        .method("PROPFIND", null)
+                        .method("PROPFIND", ByteArray(0).toRequestBody(null))
                         .header("Depth", "0")
                         .build()
                 ).execute()
